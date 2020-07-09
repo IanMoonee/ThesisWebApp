@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+<tittle>{% block page_title %} Wan Project {% endblock page_title %}</tittle>
+
+{% block container_content %}
+<pre>Start building your project by providing your project name and an IP or a hostname ( e.g www.google.com )
+</pre>
+<form method="POST">
+    <!-- Cross Site Request Forgery protection by Django -->
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" class="btn btn-success" value="Stealth port scan" id="Scan_button">
+    <br>
+</form>
+<br>
+<br>
+<br>
+<ul>
+  {% if list_of_services %}
+        <h3>Scan results for {{ target_input }}</h3>
+      {% for service in list_of_services %}
+        <li>{{ service }}</li>
+      {% endfor %}
+  {% else %}
+        {{ error_message }}
+  {% endif %}
+</ul>
+
+{% endblock container_content %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+<title>{% block page_title %} Register {% endblock page_title %}</title>
+<br>
+{% block container_content %}
+<form method="POST">
+    <!-- Cross Site Request Forgery protection by Django -->
+    {% csrf_token %}
+    {{ form|crispy }}
+    <input type="submit" value="Register">
+</form>
+{% endblock container_content %}

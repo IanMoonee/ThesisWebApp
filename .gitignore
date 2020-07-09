@@ -1,0 +1,30 @@
+.DS_Store
+# migration stuff
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
+
+# django-stuff
+*.log
+local_settings.py
+
+# installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Byte-compiled /optimized /DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# random C extentions
+*.so
+
+# Distribution & packaging arent ignored intentionally
+
+# sqlite3 database ignored intentionally due to its big size
+*.sqlite3
+/src/ThesisDB.sqlite3
+
+# idea-Pycharm
+.idea

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block link_stuff %}
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/enumeration.css' %}">
+    {% endblock link_stuff %}
+    <tittle>{% block page_title %} Passive Scanning Techniques{% endblock page_title %}</tittle>
+</head>
+{% block container_content %}
+<div class="sidenav">
+    <button class="dropdown-btn">Enumerate Hosts
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <input type="button" class="btn btn-link" value="ARP-ping-scan" name="arp-ping" id="arp-btn">
+        <br>
+        <input type="button" class="btn btn-link" value="ICMP-ping-scan" name="icmp-ping" id="icmp-btn">
+    </div>
+    <button class="dropdown-btn">Scan for open ports
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <input type="button" class="btn btn-link" value="SYN-Stealth-Scan" name="syn-stealth" id="syn-btn">
+    </div>
+    <button class="dropdown-btn">Grab Banners
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <input type="button" class="btn btn-link" value="Grab services" name="banner-grab" id="grab-btn">
+    </div>
+    <button class="dropdown-btn">CVE Search
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <input type="button" class="btn btn-link" value="Find CVE's" name="find-cve" id="cve-btn">
+    </div>
+    <button class="dropdown-btn">View Results
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <form action="{% url 'show-table' %}" method="POST">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-link" value="Result Table" name="Show-table" id="table-btn">
+        </form>
+        <form action="{% url 'show-pie' %}" method="POST">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-link" value="Charts page" name="Show-pie">
+        </form>
+    </div>
+    <button class="dropdown-btn">TraceRoute a Domain
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <form class="form-inline" action="{% url 'traceroute' %}" method="POST">
+            {% csrf_token %}
+            <input class="form-control form-control-sm" type="text" placeholder="Host-name here" id="tracert_box"
+                   name="host_addr" required>
+            <input type="submit" class="btn btn-outline-success" id="btn-success" value="Trace" name="traceroute">
+        </form>
+        <br>
+    </div>
+    <button class="dropdown-btn">Save Results
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <input type="button" class="btn btn-success" value="Save" name="save" id="save-btn">
+    </div>
+</div>
+<br>
+<br>
+<br>
+<br>
+<div class="row" id="user_info">
+    <div class="col-md-12">
+        <pre style="text-align: center">
+          <i><b>All Enumeration techniques are listed in the sidebar.</b></i>
+        </pre>
+        <br>
+    </div>
+</div>
+<br>
+<br>
+<br>
+<div class="ajax_loader">
+    <div class="spinner-grow spinner-pos" role="status">
+        <span class="sr-only">Loading..</span>
+    </div>
+</div>
+
+<div id="results_table">
+    {% if final_list %}
+    <table class="table table-dark">
+        <caption style="text-align: center"> subnet scanned ==>>{{ subnet }}</caption>
+        <thead>
+        <tr>
+            <th scope="col">IP address</th>
+            <th scope="col">MAC address</th>
+            <th scope="col">Open ports</th>
+            <th scope="col">Services grabbed</th>
+            <th scope="col">Possible CVEs</th>
+        </tr>
+        </thead>
+
+        {% for client in final_list %}
+        <tr>
+            <td>{{client.IP}}</td>
+            <td>{{client.MAC}}</td>
+            <td>{{client.PORTS}}</td>
+            <td>{{client.SERVICES}}</td>
+            <td>{{client.CVE}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</div>
+
+
+<!-- JavaScript for the sidebar  & for hide buttons -->
+<script src="{% static 'JavaScript/main.js'%}"></script>
+
+{% endblock container_content %}

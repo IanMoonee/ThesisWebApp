@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+<title>{% block page_title %}Help {% endblock page_title %}</title>
+
+{% block container_content %}
+
+<pre>Type in your project name and a subnet IP to scan and see the results.
+After that select the attack that is possible to run in the network!</pre>
+{{ session_var }}
+{% endblock container_content %}

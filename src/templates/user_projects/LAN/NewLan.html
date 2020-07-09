@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+<!-- {% crispy form form.helper %} -->
+<tittle>{% block page_title %} New Lan Project {% endblock page_title %}</tittle>
+
+{% block container_content %}
+<div class="row">
+    <div class="col-md-4">
+    </div>
+    <div style="align-content: center" class="col-md-4">
+        <div style="text-align: center" class="alert alert-dark" role="alert">
+          <h4 class="alert-heading"><i>Port options</i></h4>
+          <p>
+              <b>1.</b> Common ports option will scan only known ports like( 20,21,53,80...) and its faster.<br>
+              <b>2.</b> Wider port scan, scans a variety of ports(1-1024) its more thorough but its slower.<br>
+          </p>
+          <hr>
+        </div>
+    </div>
+</div>
+<br>
+<br>
+<div class="row">
+    <div class="col-md-4">
+    </div>
+    <div style="align-content: center" class="col-md-4">
+        <form style="align-content: center" method="POST">
+            <!-- Cross Site Request Forgery protection by Django -->
+            {% csrf_token %}
+            {{ form|crispy }}
+            <!-- {% crispy form %} -->
+            <input type="submit" class="btn btn-primary" value="Save & Continue" id="Submit_button"/>
+        </form>
+    </div>
+</div>
+
+
+{% endblock container_content %}
