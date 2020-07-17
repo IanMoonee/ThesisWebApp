@@ -43,7 +43,7 @@ $(document).ready(function () {
     $('#arp-btn').click(function () {
         $.ajax({
             type: "GET",
-            url: "/enumeration/resultsArp/",
+            url: "/dashboard/resultsArp/",
             beforeSend: () => {
                 $(".ajax_loader").show();
                 console.log('BeforeSend(arp-btn) run!!');
@@ -65,7 +65,7 @@ $(document).ready(function () {
     $('#icmp-btn').click(function () {
         $.ajax({
             type: "GET",
-            url: "/enumeration/resultsIcmp/",
+            url: "/dashboard/resultsIcmp/",
             beforeSend: () => {
                 $(".ajax_loader").show();
                 console.log('BeforeSend for icmp-btn');
@@ -87,7 +87,7 @@ $(document).ready(function () {
     $('#syn-btn').click(function () {
         $.ajax({
             type: "GET",
-            url: "/enumeration/resultsSyn/",
+            url: "/dashboard/resultsSyn/",
             beforeSend: () => {
                  $(".ajax_loader").show();
                  console.log('BeforeSend function(syn-btn) run');
@@ -109,7 +109,7 @@ $(document).ready(function () {
     $('#grab-btn').click(function () {
         $.ajax({
             type: "GET",
-            url: "/enumeration/resultsGrab/",
+            url: "/dashboard/resultsGrab/",
             beforeSend: () => {
                 $(".ajax_loader").show();
                 console.log('BeforeSend function(grab-btn) run!!');
@@ -130,7 +130,7 @@ $(document).ready(function () {
     $('#cve-btn').click(function () {
         $.ajax({
             type: "GET",
-            url: "/enumeration/resultsCVEs/",
+            url: "/dashboard/resultsCVEs/",
             beforeSend: () => {
                 $(".ajax_loader").show();
                 console.log('BeforeSend function(find-cves-btn) run!!');
@@ -152,7 +152,7 @@ $(document).ready(function () {
     $('#save-btn').click(function () {
         $.ajax({
             type: "GET",
-            url: "/enumeration/saveToDb/",
+            url: "/dashboard/saveToDb/",
             beforeSend: () => {
                 $(".ajax_loader").show();
                 console.log('BeforeSend function(save-btn) run!!');
@@ -168,30 +168,6 @@ $(document).ready(function () {
         });
     });
 });
-
-
-// //Table results JQuery
-// $(document).ready(function () {
-//     $('#table-btn').click(function () {
-//         $.ajax({
-//             type: "POST",
-//             url: "/enumeration/resultsTable/",
-//             beforeSend: () => {
-//                 $(".ajax_loader").show();
-//                 console.log('BeforeSend function(grab-btn) run!!');
-//             },
-//             success: function (data) {
-//                 // message passed from views.py!
-//                 alert(data.ports);
-//             },
-//             complete: () => {
-//                 $(".ajax_loader").hide();
-//                 console.log('Completed ajax for grab-btn!');
-//             }
-//         });
-//     });
-// });
-
 
 
 //csrf token

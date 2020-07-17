@@ -99,25 +99,26 @@ class ServiceManager:
 
 
 def update_nvd_model():
-    CSV_PATH = '/home/ianmoone/Development/ThesisEnv/src/allitems.csv'
-    count_success = 0
+    # default python path is ~/ThesisEnv/src/
+    CSV_PATH = 'allitems.csv'
+    rows_parsed = 0
     # Remove all data from table
     NvdData.objects.all().delete()
-    with open(CSV_PATH, encoding='utf-8', errors='ignore', newline='') as csvfile:
-        sreader = csv.reader(csvfile, delimiter=',', quotechar=';')
+    with open(CSV_PATH, encoding='utf-8', errors='ignore', newline='') as csv_file:
+        reader = csv.reader(csv_file, delimiter=',', quotechar=';')
         print('Parsing data and creating the model..(this could take some time)')
-        for row in sreader:
-            next(sreader, None)
-            next(sreader, None)
-            next(sreader, None)
-            next(sreader, None)
-            next(sreader, None)
-            next(sreader, None)
-            next(sreader, None)
-            next(sreader, None)
-            next(sreader, None)
-            next(sreader, None)
+        for row in reader:
+            next(reader, None)
+            next(reader, None)
+            next(reader, None)
+            next(reader, None)
+            next(reader, None)
+            next(reader, None)
+            next(reader, None)
+            next(reader, None)
+            next(reader, None)
+            next(reader, None)
             NvdData.objects.get_or_create(cve=row[0], status=row[1], description=row[2], references=row[3],
                                           phase=row[4], votes=row[5])
-            count_success += 1
-        print('Number of rows inserted :', count_success)
+            rows_parsed += 1
+        print('Number of rows inserted :', rows_parsed)

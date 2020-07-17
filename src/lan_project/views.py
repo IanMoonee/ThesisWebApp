@@ -12,20 +12,18 @@ from scapy.all import *
 from scapy.layers.inet import TCP, IP, ICMP
 from scapy.layers.l2 import Ether, ARP
 from scapy.layers.inet import traceroute as trc
-# from .forms import ProjectData, LanModelForm
 from .forms import LanModelForm
 from .models import UserProject
-# for raw sql queries without using the model.
-from django.db import connection
+from lan_project.models import NvdData
 from .utils import *
-import subprocess
+
 
 # Class based view for wide-area network scans.
 
 # New Lan Project starting page.
 class LanProject(View):
     form_class = LanModelForm
-    template_name = 'user_projects/LAN/NewLan.html'
+    template_name = 'user_projects/LAN/LanSettings.html'
 
     def get(self, request):
         form = self.form_class
@@ -66,9 +64,9 @@ class LanProject(View):
                 update_nvd_model()
             else:
                 print('Update database option was not selected.')
-            print('Redirect to enumeration page after POST.')
-            # redirects to /enumeration page (urls.py go_to_enumeration_page function is being called)
-            return redirect('/enumeration')
+            print('Redirect to dashboard page after POST.')
+            # redirects to /dashboard page (urls.py redirect_dashboard function is being called)
+            return redirect('/dashboard')
         return render(request, self.template_name, context={'form': form})
 
 
@@ -267,6 +265,10 @@ def ajax_banner_grabber(request):
 def search_for_cves(request):
     if request.is_ajax():
         scan_results_list = request.session.get('scan_results')
+        print('testing database API..')
+        # _testing = 'apache'
+        # result_db = NvdData.objects.filter(description__contains=str(_testing))
+        # print(result_db)
         for index, service in enumerate(scan_results_list):
             current_service = scan_results_list[index]['SERVICES']
             # find returns -1 if the value is not found
@@ -285,7 +287,7 @@ def search_for_cves(request):
             else:
                 print('[+] {} runs only {}'.format(scan_results_list[index]['IP'],
                                                    scan_results_list[index][
-                                                     'SERVICES']))
+                                                       'SERVICES']))
         request.session['final_list'] = scan_results_list
         print('Final scan list.', scan_results_list)
         message = {'message': 'Cve search completed'}
@@ -313,7 +315,7 @@ def populate_result_table(request):
             'subnet': subnet,
             'final_list': final_list,
         }
-        return render(request, 'user_projects/enumeration.html', table_context)
+        return render(request, 'user_projects/LAN/dashboard.html', table_context)
 
 
 # PieChart of open ports per host or CVE's perhost.
@@ -368,17 +370,14 @@ def save_to_database(request):
         return HttpResponse()
 
 
-def goto_enumeration_page(request):
-    print('Goto enumeration function run!')
+def redirect_dashboard(request):
+    print('Redirect to dashboard function run!')
     context = {
     }
-    return render(request, 'user_projects/enumeration.html', context)
+    return render(request, 'user_projects/LAN/dashboard.html', context)
 
 
 def update_nvd_database():
     subprocess.call("wget https://cve.mitre.org/data/downloads/allitems.csv.Z", shell=True)
     subprocess.call("uncompress allitems.csv.Z", shell=True)
     print('Database file downloaded and uncompressed..')
-
-
-

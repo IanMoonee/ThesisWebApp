@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 <!-- {% crispy form form.helper %} -->
-<tittle>{% block page_title %} New Lan Project {% endblock page_title %}</tittle>
+<title>{% block page_title %} Lan Project setup {% endblock page_title %}</title>
 
 {% block container_content %}
 <div class="row">
@@ -15,6 +15,11 @@
               <b>2.</b> Wider port scan, scans a variety of ports(1-1024) its more thorough but its slower.<br>
           </p>
           <hr>
+            <h4 class="alert-heading"><i>CVE Database</i></h4>
+            <p>
+                Common Vulnerabilities & exposures exist in local database ( a copy from the official <b>NVD database</b> ) <br>
+                To get the latest CVE's the database should be updated.
+            </p>
         </div>
     </div>
 </div>

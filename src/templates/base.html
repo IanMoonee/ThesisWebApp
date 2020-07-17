@@ -34,7 +34,7 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navBarDropDownMenuLink">
                     <a class="dropdown-item" href="{% url 'New_Lan' %}">Local area network</a>
-                    <a class="dropdown-item" href="#">Wide area network</a>
+                    <a class="dropdown-item" href="{% url 'New_Wan'%}">Wide area network</a>
                 </div>
             </li>
         </ul>
@@ -45,12 +45,6 @@
                 </li>
             </ul>
         </div>
-    </div>
-    <div class="collapse navbar-collapse" id="account-stuff">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Sign-up</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Sign-in</a></li>
-        </ul>
     </div>
 </nav>
 <br>
