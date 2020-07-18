@@ -1,6 +1,27 @@
 {% extends 'base.html' %}
-<title>{% block page_title %} Wan Dashboard {% endblock page_title %}</title>
-
+{% load static %}
+{% block link_stuff %}
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/WanDashboard.css' %}">
+    {% endblock link_stuff %}
+    <title>{% block page_title %}Wan Dashboard {% endblock page_title %}</title>
+</head>
 {% block container_content %}
-WAN DASHBOARD
+<div class="sidenav">
+    <button class="dropdown-btn dropdown-toggle" type="button" data-toggle="dropdown">Reconnaissance
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <div class="dropdown-header" id="header_1">Passive Recon</div>
+        <input type="button" class="btn btn-link" value="whois-lookup" name="whois" id="whois-btn">
+        <input type="button" class="btn btn-link" value="recursive-dns-query" name="recdns" id="recdns-btn">
+        <div class="dropdown-header" id="header_2">Active Recon</div>
+        <input type="button" class="btn btn-link" value="recursive-dns-query" name="recdns" id="recdnss-btn">
+    </div>
+</div>
+
+<!-- JavaScript for the sidebar  & for hide buttons -->
+<script src="{% static 'JavaScript/main.js'%}"></script>
+
 {% endblock container_content %}
