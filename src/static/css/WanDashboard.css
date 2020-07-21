@@ -53,16 +53,11 @@
   padding-right: 8px;
 }
 
-#btn-success {
-    margin-top: 5px;
-    margin-left: inherit;
-    color: #eef0f3;
-    border-color: #a73728;
-}
-
-#results_table {
+#whois-results > #result_whois_table {
+  display:none;
   width:800px;
   margin:0 auto;
+  table-layout: auto;
 }
 
 
@@ -87,8 +82,7 @@
     height: 4em;
 }
 
-
-#whois-btn {
+.btn-link {
     font-weight: 400;
     color: #007bff;
     margin-left: 15px;
@@ -96,6 +90,16 @@
 
 #header_1
 {
+    display: block;
+    padding: .5rem 1.5rem;
+    margin-bottom: 0px;
+    font-size: 20px;
+    color: #6c757d;
+    white-space: nowrap;
+    margin-top: 0px;
+}
+
+#header_2 {
     display: block;
     padding: .5rem 1.5rem;
     margin-bottom: 0px;

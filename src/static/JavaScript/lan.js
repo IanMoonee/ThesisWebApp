@@ -170,6 +170,8 @@ $(document).ready(function () {
 });
 
 
+
+
 //csrf token
 function getCookie(name) {
     let cookieValue = null;

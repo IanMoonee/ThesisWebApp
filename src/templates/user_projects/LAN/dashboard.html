@@ -101,7 +101,7 @@
             <th scope="col">Possible CVEs</th>
         </tr>
         </thead>
-
+        <tbody>
         {% for client in final_list %}
         <tr>
             <td>{{client.IP}}</td>
@@ -111,12 +111,12 @@
             <td>{{client.CVE}}</td>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
     {% endif %}
 </div>
 
-
 <!-- JavaScript for the sidebar  & for hide buttons -->
-<script src="{% static 'JavaScript/main.js'%}"></script>
+<script src="{% static 'JavaScript/lan.js'%}"></script>
 
 {% endblock container_content %}

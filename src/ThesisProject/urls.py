@@ -16,6 +16,7 @@ urlpatterns = [
     re_path('^dashboard/resultsGrab', ajax_banner_grabber),
     re_path('^dashboard/saveToDb', save_to_database),
     re_path('^dashboard/resultsCVEs', search_for_cves),
+    re_path('^WanDashboard/whoisLookup', whois_lookup),
     path('', index_view, name='base'),
     path('base', index_view, name='base'),
     path('WanSettings/', WanProject.as_view(), name='New_Wan'),
