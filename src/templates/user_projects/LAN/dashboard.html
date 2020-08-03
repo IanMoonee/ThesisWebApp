@@ -9,7 +9,7 @@
 </head>
 {% block container_content %}
 <div class="sidenav">
-    <button class="dropdown-btn">Enumerate Hosts
+    <button class="dropdown-btn dropdown-toggle">Enumerate Hosts
         <i class="fa fa-caret-down"></i>
     </button>
     <div class="dropdown-container">
@@ -17,81 +17,58 @@
         <br>
         <input type="button" class="btn btn-link" value="ICMP-ping-scan" name="icmp-ping" id="icmp-btn">
     </div>
-    <button class="dropdown-btn">Scan for open ports
+    <button class="dropdown-btn dropdown-toggle">Scan for open ports
         <i class="fa fa-caret-down"></i>
     </button>
     <div class="dropdown-container">
         <input type="button" class="btn btn-link" value="SYN-Stealth-Scan" name="syn-stealth" id="syn-btn">
     </div>
-    <button class="dropdown-btn">Grab Banners
+    <button class="dropdown-btn dropdown-toggle">Fingerprint Services
         <i class="fa fa-caret-down"></i>
     </button>
     <div class="dropdown-container">
-        <input type="button" class="btn btn-link" value="Grab services" name="banner-grab" id="grab-btn">
+        <input type="button" class="btn btn-link" value="Banner Grabber" name="banner-grab" id="grab-btn">
     </div>
-    <button class="dropdown-btn">CVE Search
+    <button class="dropdown-btn dropdown-toggle">CVE Search
         <i class="fa fa-caret-down"></i>
     </button>
     <div class="dropdown-container">
         <input type="button" class="btn btn-link" value="Find CVE's" name="find-cve" id="cve-btn">
     </div>
-    <button class="dropdown-btn">View Results
-        <i class="fa fa-caret-down"></i>
-    </button>
-    <div class="dropdown-container">
-        <form action="{% url 'show-table' %}" method="POST">
-            {% csrf_token %}
-            <input type="submit" class="btn btn-link" value="Result Table" name="Show-table" id="table-btn">
-        </form>
-        <form action="{% url 'show-pie' %}" method="POST">
-            {% csrf_token %}
-            <input type="submit" class="btn btn-link" value="Charts page" name="Show-pie">
-        </form>
-    </div>
-    <button class="dropdown-btn">TraceRoute a Domain
-        <i class="fa fa-caret-down"></i>
-    </button>
-    <div class="dropdown-container">
-        <form class="form-inline" action="{% url 'traceroute' %}" method="POST">
-            {% csrf_token %}
-            <input class="form-control form-control-sm" type="text" placeholder="Host-name here" id="tracert_box"
-                   name="host_addr" required>
-            <input type="submit" class="btn btn-outline-success" id="btn-success" value="Trace" name="traceroute">
-        </form>
-        <br>
-    </div>
-    <button class="dropdown-btn">Save Results
-        <i class="fa fa-caret-down"></i>
-    </button>
-    <div class="dropdown-container">
-        <input type="button" class="btn btn-success" value="Save" name="save" id="save-btn">
+    <div id="exploitation-page">
+            <!-- url Lan-Attacks -->
+<!--        <form action="" method="POST">-->
+<!--            {% csrf_token %}-->
+<!--            <input type="submit" class="btn btn-primary" value="Exploitation Page" name="goto-exploitation"-->
+<!--                   id="exploit-btn">-->
+<!--        </form>-->
+        <a href="{% url 'Lan-attacks' %}">Exploitation Page</a>
     </div>
 </div>
-<br>
-<br>
-<br>
-<br>
 <div class="row" id="user_info">
     <div class="col-md-12">
-        <pre style="text-align: center">
-          <i><b>----  ----</b></i>
-        </pre>
-        <br>
+        <div style="text-align: center" class="alert alert-dark" role="alert">
+          <h4 class="alert-heading"><i>Dashboard Page</i></h4>
+          <p>
+              All scanning & enumeration takes place here.<br>
+              After each scan results are presented on a table.<br>
+              After scanning is complete you can proceed to exploitation page for<br>
+              some local attacks.
+          </p>
+        </div>
     </div>
 </div>
-<br>
 <br>
 <br>
 <div class="ajax_loader">
-    <div class="spinner-grow spinner-pos" role="status">
+    <div class="spinner-border text-light spinner-pos" role="status">
         <span class="sr-only">Loading..</span>
     </div>
 </div>
 
 <div id="results_table">
-    {% if final_list %}
-    <table class="table table-dark">
-        <caption style="text-align: center"> subnet scanned ==>>{{ subnet }}</caption>
+    <table class="table table-dark table-striped" id="lan_table_results">
+<!--        <caption style="text-align: center"> subnet scanned : {{ subnet }}</caption>-->
         <thead>
         <tr>
             <th scope="col">IP address</th>
@@ -102,18 +79,16 @@
         </tr>
         </thead>
         <tbody>
-        {% for client in final_list %}
         <tr>
-            <td>{{client.IP}}</td>
-            <td>{{client.MAC}}</td>
-            <td>{{client.PORTS}}</td>
-            <td>{{client.SERVICES}}</td>
-            <td>{{client.CVE}}</td>
+            <td id="ips"></td>
+            <td id="macs"></td>
+            <td id="ports"></td>
+            <td id="banners"></td>
+            <td id="cves"></td>
         </tr>
-        {% endfor %}
+
         </tbody>
     </table>
-    {% endif %}
 </div>
 
 <!-- JavaScript for the sidebar  & for hide buttons -->

@@ -1,7 +1,7 @@
 /* Fixed sidenav, full height */
 .sidenav {
   height: 100%;
-  width: 200px;
+  width: 230px;
   position: fixed;
   z-index: 1;
   top: 50px;
@@ -12,20 +12,19 @@
 }
 
 /* Style the sidenav links and the dropdown button */
-.sidenav a, .dropdown-btn {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 20px;
-  color: #818181;
-  display: block;
-  border: none;
-  background: none;
-  width:100%;
-  text-align: left;
-  cursor: pointer;
-  outline: none;
+sidenav a, .dropdown-btn {
+    padding: 15px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #e9ecefe8;
+    display: block;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
 }
-
 
 /* On mouse-over */
 .sidenav a:hover, .dropdown-btn:hover {
@@ -53,24 +52,9 @@
   padding-right: 8px;
 }
 
-#tracert_box {
-    margin-top: 3px;
-    height: calc(1.5em + .79em + 5px);
-    padding: .4rem .1rem;
-    font-size: .875rem;
-    line-height: 1.5;
-    border-radius: .3rem;
-}
-
-#btn-success {
-    margin-top: 5px;
-    margin-left: inherit;
-    color: #eef0f3;
-    border-color: #a73728;
-}
-
 #results_table {
-  width:800px;
+  display:none;
+  width:1000px;
   margin:0 auto;
 }
 
@@ -96,9 +80,19 @@
     height: 4em;
 }
 
-#save-btn {
-    margin-top: 7px;
-    margin-left: 50px;
-    margin-bottom: 7px;
+/* exploitation button */
+
+#exploit-btn.btn.btn-primary {
+    background-color: #343A40;
+    color: white;
+    border-color: #FFFFFF;
+    box-shadow: 0 8px 16px 0 rgb(234 230 230 / 20%), 0 6px 20px 0 rgba(0,0,0,0.19);
+    margin-top: 30px;
+    margin-left: 25px;
 }
+
+#exploit-btn.btn.btn-primary:hover {
+
+}
+
 

@@ -33,7 +33,6 @@
             <!-- Cross Site Request Forgery protection by Django -->
             {% csrf_token %}
             {{ form|crispy }}
-            <!-- {% crispy form %} -->
             <input type="submit" class="btn btn-primary" value="Save & Continue" id="Submit_button"/>
         </form>
     </div>

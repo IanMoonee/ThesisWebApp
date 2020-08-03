@@ -6,6 +6,28 @@
     transition: all 0.5s ease;
 }
 
+
+#navbarDropDownMenuLink  #DropDownBase {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 10rem;
+    padding: .5rem 0;
+    margin: .125rem 0 0;
+    font-size: 1rem;
+    color: #FFFFFF;
+    text-align: left;
+    list-style: none;
+    background-color: #0d57a3;
+    background-clip: padding-box;
+    border: 1px solid rgb(255 255 255);
+    border-radius: .25rem;
+
+}
+
 #wrapper.toggled {
     padding-left: 250px;
 }

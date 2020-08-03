@@ -15,13 +15,27 @@
     <div class="dropdown-container">
         <div class="dropdown-header" id="header_1">Passive Recon</div>
         <input type="button" class="btn btn-link" value="whois-lookup" name="whois" id="whois-btn">
+        <br>
+        <form class="form-inline" action="{% url 'traceroute' %}" method="POST">
+                {% csrf_token %}
+                <input type="submit" class="btn btn-link" id="btn-success" value="Traceroute domain" name="traceroute">
+            </form>
+            <br>
         <div class="dropdown-header" id="header_2">Active Recon</div>
-        <input type="button" class="btn btn-link" value="recursive-dns" name="recdns" id="recdnss-btn">
+        <input type="button" class="btn btn-link" value="recursive-dns" name="recdns" id="recdns-btn">
+        <br>
+        <input type="button" class="btn btn-link" value="SYN Port Scan" name="synscan" id="portscan-btn">
+        <br>
+        <input type="button" class="btn btn-link" value="Banner Grabber" name="bannergrab" id="bannergrab-btn">
+        <br>
+        <input type="button" class="btn btn-link" value="Discover Subdomains" name="subdomains" id="subdomains-btn">
+        <br>
+        <input type="button" class="btn btn-link" value="BruteForce Directories" name="bruteforce" id="bruteforce-btn">
+        <br>
     </div>
 </div>
 
 <br>
-
 <br>
 <br>
 <div class="ajax_loader">
@@ -45,6 +59,8 @@
         </tbody>
     </table>
 </div>
+
+<br>
 <!-- JavaScript for the sidebar  & for hide buttons -->
 <script src="{% static 'JavaScript/wan.js'%}"></script>
 

@@ -88,6 +88,10 @@
     margin-left: 15px;
 }
 
+#portScan {
+    display: none;
+}
+
 #header_1
 {
     display: block;

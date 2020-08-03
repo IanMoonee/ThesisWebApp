@@ -1,7 +1,5 @@
 from django import forms
 from .models import UserProject
-# Form helper allows us to control what is displayed by crispy forms
-from crispy_forms.helper import FormHelper
 
 
 # Model Form is a form that is bound(connected) to a model.
@@ -23,3 +21,7 @@ class LanModelForm(forms.ModelForm):
                   'port_options',
                   'update_db_option'
                   ]
+
+
+class ArpSpoofForm(forms.Form):
+    ip_to_attack = forms.GenericIPAddressField(label='IP to Attack', required=True)

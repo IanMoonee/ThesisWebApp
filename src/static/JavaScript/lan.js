@@ -21,6 +21,7 @@ const arp_btn = document.getElementById("arp-btn");
 const syn_btn = document.getElementById("syn-btn");
 const grab_btn = document.getElementById("grab-btn");
 
+
 arp_btn.onclick = function () {
 
   document.getElementById("icmp-btn").style.visibility="hidden";
@@ -38,7 +39,8 @@ grab_btn.onclick = function () {
 
 };
 
-//ARP SCAN Jquery
+
+//ARP SCAN
 $(document).ready(function () {
     $('#arp-btn').click(function () {
         $.ajax({
@@ -48,9 +50,25 @@ $(document).ready(function () {
                 $(".ajax_loader").show();
                 console.log('BeforeSend(arp-btn) run!!');
             },
-            success: function (data) {
-                // message passed from views.py!
-                alert(data.message);
+            success: function (arp_data) {
+                // by default table with results is hidden.
+                $("#results_table").show();
+                // alert(arp_data.message);
+                //let res_table = $("#lan_table_results tbody")
+                let res_table_ip = $("#lan_table_results tbody tr #ips")
+                let res_table_mac = $("#lan_table_results tbody tr #macs")
+                let ips = arp_data.ip_addresses
+                let macs = arp_data.mac_addresses
+                console.log(ips)
+                console.log(macs)
+                let i
+                for (i=0 ; i<ips.length ; i++)
+                {
+                        res_table_ip.append("<tr><td>" + ips[i] + "</td></tr>")
+                        res_table_mac.append("<tr><td>" + macs[i] + "</td></tr>")
+                        //res_table.append("<tr><td>" +  ips[i] + "</td><td>" + macs[i] + "</td></tr>");
+
+                }
             },
             complete: () => {
                 $(".ajax_loader").hide();
@@ -60,7 +78,7 @@ $(document).ready(function () {
     });
 });
 
-//ICMP SCAN JQuery
+//Host-alive SCAN
 $(document).ready(function () {
     $('#icmp-btn').click(function () {
         $.ajax({
@@ -82,7 +100,7 @@ $(document).ready(function () {
     });
 });
 
-//SYN-SCAN JQuery
+//SYN-SCAN
 $(document).ready(function () {
     $('#syn-btn').click(function () {
         $.ajax({
@@ -92,9 +110,22 @@ $(document).ready(function () {
                  $(".ajax_loader").show();
                  console.log('BeforeSend function(syn-btn) run');
             },
-            success: function (data) {
-                // message passed from views.py!
-                alert(data.message);
+            success: function (new_data) {
+                console.log(new_data.port_results)
+                let res_table_ports = $("#lan_table_results tbody tr #ports")
+                $(jQuery.parseJSON(JSON.stringify(new_data.port_results))).each(function() {
+                        let _PORTS = this.PORTS;
+                        let PORTS
+                        if (_PORTS === "")
+                        {
+                            PORTS = "--"
+                        }else {
+                            // remove redundant comma at the end of each string
+                            PORTS = _PORTS.slice(0, -1)
+                        }
+                        console.log(PORTS)
+                        res_table_ports.append("<tr><td>" + PORTS + "</td></tr>")
+                    });
             },
             complete: () => {
                  $(".ajax_loader").hide();
@@ -104,7 +135,7 @@ $(document).ready(function () {
     });
 });
 
-//Banner-grab JQuery
+//Banner-grabber
 $(document).ready(function () {
     $('#grab-btn').click(function () {
         $.ajax({
@@ -115,8 +146,17 @@ $(document).ready(function () {
                 console.log('BeforeSend function(grab-btn) run!!');
             },
             success: function (data) {
-                // message passed from views.py!
-                alert(data.message);
+                //console.log(data.grabber_results)
+                let res_table_services = $("#lan_table_results tbody tr #banners")
+                $(jQuery.parseJSON(JSON.stringify(data.grabber_results))).each(function() {
+                        let SERVICES = this.SERVICES;
+                        if (SERVICES === "")
+                        {
+                            SERVICES = "--"
+                        }
+                        console.log(SERVICES)
+                        res_table_services.append("<tr><td>" + SERVICES + "</td></tr>")
+                    });
             },
             complete: () => {
                 $(".ajax_loader").hide();
@@ -126,6 +166,7 @@ $(document).ready(function () {
     });
 });
 
+// CVE-search
 $(document).ready(function () {
     $('#cve-btn').click(function () {
         $.ajax({
@@ -136,8 +177,18 @@ $(document).ready(function () {
                 console.log('BeforeSend function(find-cves-btn) run!!');
             },
             success: function (data) {
-                // message passed from views.py!
-                alert(data.message);
+                console.log(data.cve_results)
+                let res_table_cves = $("#lan_table_results tbody tr #cves")
+                $(jQuery.parseJSON(JSON.stringify(data.cve_results))).each(function() {
+                        let CVE = this.CVE;
+                        if (CVE === "")
+                        {
+                            CVE = "--"
+                        }
+                        console.log(CVE)
+                        res_table_cves.append("<tr><td>" + CVE + "</td></tr>")
+                    });
+
             },
             complete: () => {
                 $(".ajax_loader").hide();
@@ -147,58 +198,32 @@ $(document).ready(function () {
     });
 });
 
-//Save-results JQuery
-$(document).ready(function () {
-    $('#save-btn').click(function () {
-        $.ajax({
-            type: "GET",
-            url: "/dashboard/saveToDb/",
-            beforeSend: () => {
-                $(".ajax_loader").show();
-                console.log('BeforeSend function(save-btn) run!!');
-            },
-            success: function (data) {
-                // message passed from views.py!
-                alert(data.message);
-            },
-            complete: () => {
-                $(".ajax_loader").hide();
-                console.log('Completed ajax for save-btn!');
-            }
-        });
-    });
-});
-
-
-
-
-//csrf token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        let cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            let cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-let csrftoken = getCookie('csrftoken');
-
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-$.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
+// $(document).ready(function () {
+//     $('#spoof-btn').click(function () {
+//         $.ajax({
+//             type: "POST",
+//             url: "/dashboard/Exploitation/",
+//             beforeSend: () => {
+//                 console.log('BeforeSend(arp-btn) run!!');
+//             },
+//             success: function (some_data) {
+//                 console.log("WTF")
+//             },
+//             complete: () => {
+//                 $(".ajax_loader").hide();
+//                 console.log('Completed ajax for arp-spoof btn');
+//             }
+//         });
+//     });
+// });
+// Event listener for BackWards button.
+history.pushState(null, document.title, location.href);
+window.addEventListener('popstate', function (event)
+{
+    const leavePage = confirm("Are you sure you want to go back? Project results will not be saved");
+    if (leavePage) {
+        history.back();
+    } else {
+        history.pushState(null, document.title, location.href);
     }
 });
