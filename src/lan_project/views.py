@@ -1,17 +1,12 @@
 import json
 from ipaddress import IPv4Network
-import PIL
-import PIL.Image
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
-# import for the class-based-views
 from django.views import View
-from matplotlib import pylab as plt
 from pylab import *
 from scapy.all import *
 from scapy.layers.inet import TCP, IP, ICMP
 from scapy.layers.l2 import Ether, ARP
-from scapy.layers.inet import traceroute as trc
 from .forms import LanModelForm, ArpSpoofForm
 from .models import UserProject
 from lan_project.models import NvdData
@@ -76,7 +71,7 @@ def arp_scan(request):
         macs = []
         for sent, received in ans:
             arp_scan_results.append(
-                {'IP': received[1].psrc, 'MAC': received[1].hwsrc, 'PORTS': '', 'SERVICES': '', 'CVE': ''})
+                {'IP': received[1].psrc, 'MAC': received[1].hwsrc, 'PORTS': '', 'SERVICES': '', 'CVE': '', 'DESCRIPTION': '', 'SERVICE_CVE': ''})
             alive_hosts.append(received[1].psrc)
             macs.append(received[1].hwsrc)
         print('ARP SCAN RESULTS:')
@@ -85,8 +80,7 @@ def arp_scan(request):
 
         # only the alive hosts to use at port scan.
         request.session['alive_hosts'] = alive_hosts
-        request.session['macs'] = macs
-        request.session['arp_scan_results'] = arp_scan_results
+        # request.session['arp_scan_results'] = arp_scan_results
         request.session['scan_results'] = arp_scan_results
         arp_data = {
             'ip_addresses': alive_hosts,
@@ -158,11 +152,11 @@ def syn_port_scan(request):
                         print('[-] Host: {} port {} is filtered'.format(host, dst_port))
         print('[+] Syn-stealth scan completed')
         request.session['scan_results'] = scan_results
-        new_data = {
+        syn_data = {
             'port_results': scan_results,
             'message': 'Port Scanning completed.'
         }
-        return HttpResponse(json.dumps(new_data), content_type='application/json')
+        return HttpResponse(json.dumps(syn_data), content_type='application/json')
     else:
         raise Http404
 
@@ -177,20 +171,26 @@ def banner_grabber_lan(request):
             for port in ports:
                 try:
                     socket_obj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    # set a connection timeout
                     socket_obj.settimeout(2)
                     con_result = socket_obj.connect_ex((active_host, port))
+                    # if con_result equals 0 that means we established a connection
                     if port == 80 and con_result == 0:
+                        # craft byte object to send to the server
                         bytes_to_send = str.encode("HEAD / HTTP/1.1\r\n\r\n")
                         socket_obj.send(bytes_to_send)
+                        # decode server's answer
                         banner = socket_obj.recv(1024).decode('utf-8')
                         banner = reform_banner(banner)
                         banner = string_replacer(banner)
                         print('[+] {}:{} --> {}'.format(active_host, port, banner))
                         scan_results[index]['SERVICES'] += str(banner)
                         socket_obj.close()
+                    # connection result for ports other than HTTP
                     if con_result == 0:
                         banner = socket_obj.recv(1024).decode('utf-8')
                         banner = string_replacer(banner)
+                        banner = ServiceManager.analyze_service(banner)
                         print('[+] {}:{} --> {}'.format(active_host, port, banner))
                         scan_results[index]['SERVICES'] += str(banner) + ','
                         socket_obj.close()
@@ -199,11 +199,11 @@ def banner_grabber_lan(request):
                     print(ex)
         request.session['scan_results'] = scan_results
         print('[+] Banner grabber completed')
-        grab_results = {
+        banner_results = {
             'grabber_results': scan_results,
             'message': 'Banner Grabber completed'
         }
-        return HttpResponse(json.dumps(grab_results), content_type='application/json')
+        return HttpResponse(json.dumps(banner_results), content_type='application/json')
     else:
         raise Http404
 
@@ -211,45 +211,69 @@ def banner_grabber_lan(request):
 def cve_search(request):
     if request.is_ajax():
         scan_results_list = request.session.get('scan_results')
-        list_of_urls = []
         for index, service in enumerate(scan_results_list):
             current_service = scan_results_list[index]['SERVICES']
+            # current_service = '220 vsFTPd 3.0.3,Apache/2.4.41 Ubuntu'
             # find returns -1 if the value is not found
             if not current_service:
                 print('[+] {}:Runs no services.No possible CVE'.format(scan_results_list[index]['IP']))
+                scan_results_list[index]['CVE'] += ' '
+                scan_results_list[index]['DESCRIPTION'] += ' '
+            # Multiple services separated with ' , '
             elif current_service.find(',') != -1:
                 print('[+] {} runs : {} '.format(scan_results_list[index]['IP'],
                                                  scan_results_list[index][
                                                      'SERVICES']))
                 print('[+] Split different services')
                 multiple_services = current_service.split(',')
-                #   index 0          index 1
-                # ['Apache/2.4.41', 'vsFTPd 3.0.3']
-                # logic for multiple services
-                print(multiple_services[0])
-                query = NvdData.objects.filter(description__contains='Apache').filter(cve__contains='2019')[:10].values(
-                    'cve', 'references')
-                cve_list = list(query)
-                print(cve_list)
-                print(cve_list[0]['references'])
-                print(cve_list[5]['references'])
-                list_of_urls = extract_url(cve_list)
-                scan_results_list[index]['CVE'] = list_of_urls
+                # multiple_services = ['220 vsFTPd 3.0.3', 'Apache/2.4.41 Ubuntu']
+                #        index 0                   index 1
+                # ['220 vsFTPd 3.0.3', 'Apache/2.4.41 Ubuntu']
+                print(multiple_services)
+                service_1 = ServiceManager.analyze_service(multiple_services[0])
+                service_2 = ServiceManager.analyze_service(multiple_services[1])
+                # service_1 = ['vsFTPd 3.0.3']
+                # service_2 = ['Apache', '2.4.41']
+                query_res_1, serv = ServiceManager.construct_query(service_1)
+                query_res_2, serv_2 = ServiceManager.construct_query(service_2)
+                # TODO: check if the list has more than one CVE.
+                if isinstance(query_res_1, list):
+                    # checking for empty queryset
+                    if query_res_1:
+                        cve_string = str(query_res_1[0]['cve'])
+                        references_string = str(query_res_1[0]['references'])
+                        reformed_refs = string_replacer(references_string)
+                        scan_results_list[index]['CVE'] += str(cve_string)
+                        scan_results_list[index]['DESCRIPTION'] += str(reformed_refs)
+                        scan_results_list[index]['SERVICE_CVE'] += str(serv)
+                else:
+                    scan_results_list[index]['CVE'] += '--'
+                    scan_results_list[index]['DESCRIPTION'] += '--'
+                if isinstance(query_res_2, list):
+                    if query_res_2:
+                        cve_string = str(query_res_2[0]['cve'])
+                        references_string = str(query_res_2[0]['references'])
+                        reformed_refs = string_replacer(references_string)
+                        scan_results_list[index]['CVE'] += str(cve_string)
+                        scan_results_list[index]['DESCRIPTION'] += str(reformed_refs)
+                        scan_results_list[index]['SERVICE_CVE'] += str(serv_2)
+                else:
+                    scan_results_list[index]['CVE'] += '--'
+                    scan_results_list[index]['DESCRIPTION'] += '--'
+            # One service only ( example: nginx or ZTE Mini Web Server 1.0)
             else:
+                print('Query for one service only will be run.')
                 print('[+] {} runs only {}'.format(scan_results_list[index]['IP'],
                                                    scan_results_list[index][
                                                        'SERVICES']))
-                query = NvdData.objects.filter(description__contains=current_service).filter(cve__contains='2019')[
-                        :5].values('cve', 'references')
-                # convert django.db.models.query.QuerySet to List in order to
-                # be able to iterate
-                cve_list = list(query)
-                list_of_urls = extract_url(cve_list)
-                print(list_of_urls)
-                scan_results_list[index]['CVE'] = list_of_urls
-                # TypeError: can only concatenate str (not "list") to str
-                # scan_results_list[index]['CVE'] += cve_list
-                scan_results_list[index]['CVE'] = cve_list
+                query = NvdData.objects.filter(description__contains=current_service).reverse()[:2].values('cve', 'references')
+                q_list = list(query)
+                if q_list:
+                    cve_str = str(q_list[0]['cve'])
+                    ref_str = str(q_list[0]['references'])
+                    reformed_refs = string_replacer(ref_str)
+                    scan_results_list[index]['CVE'] += str(cve_str)
+                    scan_results_list[index]['DESCRIPTION'] += str(reformed_refs)
         request.session['final_list'] = scan_results_list
         print('Final scan list.', scan_results_list)
         cve_results = {
@@ -259,31 +283,6 @@ def cve_search(request):
         return HttpResponse(json.dumps(cve_results), content_type='application/json')
     else:
         raise Http404
-
-
-def render_result_pie(request):
-    if request.POST.get('Show-pie'):
-        labels = ['Port:80(http)', 'Port:21(ftp)', 'Port:443(https)']
-        sizes = [1, 2, 0]
-        colors = ['#ff9999', '#66b3ff', '#99ff99']
-        # distances between stuff
-        explode = (0.05, 0.05, 0.05)
-        plt.title('Open ports')
-        fig1, ax1 = plt.subplots()
-        ax1.pie(sizes, labels=labels, colors=colors, shadow=True, autopct='%1.1f%%', pctdistance=0.85, startangle=90,
-                explode=explode)
-        # draw circle
-        centre_circle = plt.Circle((0, 0), 0.70, fc='white')
-        fig = plt.gcf()
-        fig.gca().add_artist(centre_circle)
-        # Ensure that is a circle
-        ax1.axis('equal')
-        plt.tight_layout()
-        canvas = plt.get_current_fig_manager().canvas
-        canvas.draw()
-        pil_image = PIL.Image.frombytes('RGB', canvas.get_width_height(), canvas.tostring_rgb())
-        pil_image.save('static/images/result_graph.png')
-        return render(request, 'user_projects/LAN/graphs.html', context={})
 
 
 def update_database():
@@ -302,15 +301,40 @@ def redirect_dashboard(request):
 def exploitation_page(request):
     if request.method == 'POST':
         form = ArpSpoofForm(request.POST)
-        # TODO: Handle the request in case the request is POST but its not valid.
         if form.is_valid():
-            target_ip = form.cleaned_data['ip_to_attack']
-            print(target_ip)
+            victim_ip = form.cleaned_data['victim_ip']
+            host_ip = form.cleaned_data['host_ip']
+            try:
+                while True:
+                    start_arp_spoof(victim_ip, host_ip)
+                    start_arp_spoof(host_ip, victim_ip)
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                restore_arp_spoof(victim_ip, host_ip)
+                restore_arp_spoof(host_ip, victim_ip)
+            print(victim_ip)
             context = {
-                'ip': target_ip
+                'victim_ip': victim_ip,
+                'host_ip': host_ip
             }
             return HttpResponse(json.dumps(context), content_type='application/json')
+        else:
+            form = ArpSpoofForm()
+            scan_list = request.session.get('scan_results')
+            subnet = request.session.get('subnet')
+            # get the default gateway
+            d_gateway = conf.route.route("0.0.0.0")[2]
+            for index, ip in enumerate(scan_list):
+                if scan_list[index]['IP'] == d_gateway:
+                    scan_list[index]['IP'] += ' (d.gateway)'
+            context = {
+                'scan_list': scan_list,
+                'subnet': subnet,
+                'form': form
+            }
+            return render(request, 'user_projects/LAN/exploitation.html', context)
     else:
+        # Get method(when the page renders for the first time)
         form = ArpSpoofForm()
         scan_list = request.session.get('scan_results')
         subnet = request.session.get('subnet')

@@ -141,29 +141,7 @@ $(document).ready(function () {
     });
 });
 
-// banner grabber
-// $(document).ready(function () {
-//     $('#test-btn').click(function () {
-//         $.ajax({
-//             type: "GET",
-//             url: "/WanDashboard/test/",
-//             dataType: 'json',
-//             beforeSend: () => {
-//                 $(".ajax_loader").show();
-//                 console.log('BeforeSend test Ajax.');
-//             },
-//             success: function (portScan_data) {
-//                 // $("#result_whois_table").show();
-//                 alert('Test called');
-//             },
-//             complete: () => {
-//                 $(".ajax_loader").hide();
-//                 console.log('Completed test ajax.');
-//             }
-//         });
-//     });
-// });
-
+// directory bruteforcing
 $(document).ready(function () {
     $('#bruteforce-btn').click(function () {
         $.ajax({
@@ -172,10 +150,13 @@ $(document).ready(function () {
             dataType: 'json',
             beforeSend: () => {
                 $(".ajax_loader").show();
-                console.log('BeforeSend fuzzer .');
+                console.log('BeforeSend fuzzer');
             },
             success: function (fuzzed_data) {
                 alert('Directory fuzzing completed.');
+                let whois_table = $("#result_whois_table tbody");
+                whois_table.append("<tr><th scope='col'>Discovered Directories</th><td>" +  fuzzed_data.directories + "</td></tr>");
+                // whois_table.append("<tr><th scope='col'>Sensitive Files </th><td>" +  fuzzed_data.sensitive_files + "</td></tr>");
             },
             complete: () => {
                 $(".ajax_loader").hide();

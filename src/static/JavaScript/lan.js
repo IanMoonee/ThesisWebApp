@@ -177,16 +177,25 @@ $(document).ready(function () {
                 console.log('BeforeSend function(find-cves-btn) run!!');
             },
             success: function (data) {
+                $("#cve_table").show();
                 console.log(data.cve_results)
-                let res_table_cves = $("#lan_table_results tbody tr #cves")
+                let res_table_cves = $("#cve_results_table tbody tr #cve")
+                let res_table_desc = $("#cve_results_table tbody tr #description")
+                let res_table_serv_cve = $("#cve_results_table tbody tr #serv_cve")
                 $(jQuery.parseJSON(JSON.stringify(data.cve_results))).each(function() {
                         let CVE = this.CVE;
+                        let DESC = this.DESCRIPTION;
+                        let SERV_CVE = this.SERVICE_CVE;
                         if (CVE === "")
                         {
                             CVE = "--"
+                            DESC = "--"
                         }
                         console.log(CVE)
                         res_table_cves.append("<tr><td>" + CVE + "</td></tr>")
+                        res_table_desc.append("<tr><td>" + DESC + "</td></tr>")
+                        //res_table_service.append("<tr><td>" + SERVICE + "</td></tr>")
+                        res_table_serv_cve.append("<tr><td class='border border-danger'>" + SERV_CVE + "</td></tr>")
                     });
 
             },

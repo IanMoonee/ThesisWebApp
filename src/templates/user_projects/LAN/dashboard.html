@@ -42,7 +42,7 @@
 <!--            <input type="submit" class="btn btn-primary" value="Exploitation Page" name="goto-exploitation"-->
 <!--                   id="exploit-btn">-->
 <!--        </form>-->
-        <a href="{% url 'Lan-attacks' %}">Exploitation Page</a>
+        <a href="{% url 'Lan-attacks' %}" id="exploitation_page">Exploitation Page</a>
     </div>
 </div>
 <div class="row" id="user_info">
@@ -75,7 +75,7 @@
             <th scope="col">MAC address</th>
             <th scope="col">Open ports</th>
             <th scope="col">Services grabbed</th>
-            <th scope="col">Possible CVEs</th>
+            <!-- <th scope="col">Possible CVEs</th> -->
         </tr>
         </thead>
         <tbody>
@@ -84,9 +84,27 @@
             <td id="macs"></td>
             <td id="ports"></td>
             <td id="banners"></td>
-            <td id="cves"></td>
         </tr>
 
+        </tbody>
+    </table>
+</div>
+<br>
+<div id="cve_table">
+    <table class="table table-dark table-striped" id="cve_results_table">
+        <thead>
+        <tr>
+            <th scope="col">Cve</th>
+            <th scope="col">Description</th>
+            <th scope="col">Vulnerable Service</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td id="cve"></td>
+            <td id="description"></td>
+            <td id="serv_cve"></td>
+        </tr>
         </tbody>
     </table>
 </div>

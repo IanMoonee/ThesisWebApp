@@ -58,6 +58,12 @@ sidenav a, .dropdown-btn {
   margin:0 auto;
 }
 
+#cve_table {
+  display:none;
+  width:1200px;
+  margin:0 auto;
+}
+
 
 .ajax_loader {
     display: none;
@@ -80,19 +86,21 @@ sidenav a, .dropdown-btn {
     height: 4em;
 }
 
-/* exploitation button */
-
-#exploit-btn.btn.btn-primary {
-    background-color: #343A40;
-    color: white;
-    border-color: #FFFFFF;
-    box-shadow: 0 8px 16px 0 rgb(234 230 230 / 20%), 0 6px 20px 0 rgba(0,0,0,0.19);
-    margin-top: 30px;
-    margin-left: 25px;
+#exploitation_page{
+    color: #dee2e6;
+    text-decoration: none;
+    background-color: transparent;
+    margin-left: 20px;
+    display: inline-block;
+    padding: 25px;
+    font-size: 20px;
+    font-weight: 20;
 }
 
-#exploit-btn.btn.btn-primary:hover {
-
+#exploitation_page:hover {
+  text-decoration: none;
 }
+
+
 
 

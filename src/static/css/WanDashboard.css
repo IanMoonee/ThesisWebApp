@@ -55,7 +55,7 @@
 
 #whois-results > #result_whois_table {
   display:none;
-  width:800px;
+  width:1000px;
   margin:0 auto;
   table-layout: auto;
 }
